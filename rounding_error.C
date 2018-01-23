@@ -4,14 +4,17 @@ void rounding_error(Int_t ichoice=1) {
    //
    //Author: Edward J. Brash, look at rounding errors
    //			 	by comparing derivative to calculation
-  
+
+   // Define a canvas or new *plot*
    TCanvas *c1 = new TCanvas("c1","Absolute Error",1200,520,700,500);
 
+   // Set fill colors, grid lines, and a logarithmic x and y scale.
    c1->SetFillColor(41);
    c1->SetGrid();
    c1->SetLogx();
    c1->SetLogy();
 
+   // Initialize variables
    const Int_t n = 21;
    Double_t h, hpower;
    Double_t dfunc[n], dfunch[n], dfunchh[n],xfunc[n], xfunchp[n], xfunchm[n];
@@ -19,6 +22,7 @@ void rounding_error(Int_t ichoice=1) {
    Double_t x[n],diff[n],difftwo[n];
    Double_t xval = 1.0;
    
+   // TODO is this actually a choice? Or is it always 1?
    if (ichoice == 1) {
 	cout << "Using forward derivative ... " << endl;
    }else if (ichoice==2) {
@@ -28,7 +32,7 @@ void rounding_error(Int_t ichoice=1) {
    }
 
    for (Int_t i=0;i<n;i++) {
-
+     // Not EXACTLY sure what this is doing but I should be able to replicate the math
      hpower=i-n+1;
      x[i] = pow(10.0,hpower);
      dfunc[i]=3.0e+00*xval*xval;
@@ -38,6 +42,7 @@ void rounding_error(Int_t ichoice=1) {
      xfunchpp[i]=(xval+x[i]+x[i])*(xval+x[i]+x[i])*(xval+x[i]+x[i]);
      xfunchmm[i]=(xval-x[i]-x[i])*(xval-x[i]-x[i])*(xval-x[i]-x[i]);
 
+     // TODO not sure if this is a choice either
      if (ichoice == 1) {
 	dfunch[i]=(xfunchp[i]-xfunc[i])/(x[i]);
      }else if (ichoice ==2 ) {
