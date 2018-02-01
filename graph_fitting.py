@@ -1,112 +1,137 @@
 #TODO include imports
+import numpy as np
 
-#include <ostream>
-#include "TMatrixD.h"
-#include "TRandom.h"
-
-# A cubic function whos parameters are specified locally TODO figure out how to feed in arguments
+# A cubic function whos parameters are specified locally
 generating_function(x):
 	par = [1.80, -4.05, 0.40, 1.0000]
 	return par[0]+par[1]*x+par[2]*x*x+par[3]*x*x*x
 
-# TODO define a plot here
+# Define plot figure
+fig = plt.figure()
 # new TCanvas("c1","Cubic Data",200,10,700,500)
 
-# Set the order of the fitting polynomial here #TODO possibly make this a command line choice
+# Set the order of the fitting polynomial here
 m = 3
 
 # TODO Define grid colors and set gridlines
 
+
+#TODO double check this is defined correctly
 n = 15 # Number of data points
-x[n], y[n], rnd, = [] # Arrays to hold xy values and fluctuations. #TODO double check this is defined correctly
+x[n] = []
+y[n] = []
+rnd = [] # Arrays to hold xy values and fluctuations.
 
 # TODO possibly determine a constant i, might not be necessary if its set later on
 # r = math.rand #TODO figure out a random number generator
-#**********************************************
-void graph_fitting() {
-  
-   for (i=0;i<n;i++){
-	   x[i]=-4.0+8.0*i/n;  // choose x betwen -4 and 4
-	   y[i]=generating_function(x[i]); // call generating function
-	   rnd = r.Gaus(0.0,1.5); 
-	   y[i]=y[i]+rnd; // add some random "noise" to data
-   }
 
-//
-// Use ROOT's linear algebra package to calculate fix parameters "by hand"
-//
+for i in range(0,n):
+	# Choose an x value between -4 and 4
+	x[i] = -4.0+8.0*i/n
+	# Call cubic generating function
+	y[i] = generating_function(x[i])
+	rnd = r.Gauss(0.0, 1.5) #TODO generate a gaussian, ask what these arguments mean: rnd = r.Gaus(0.0,1.5);
+	# Add random 'noise' to the data
+	y[i] = y[i] + rnd
 
-   const Int_t m_params = m+1;
-   Int_t k = 0;
-   Int_t j =0;
+# Calculate fit parameters "by hand"
+m_params = m+1
+k = 0
+j = 0
 
-   TMatrixD a(m_params,m_params);
-   TMatrixD aold(m_params,m_params);
-   TMatrixD v(m_params,1);
-   Double_t det;
+# TODO make sure these matrices are defined correctly
+a = np.empty([m_params, m_params])
+aold = np.empty([m_params, m_params])
+v = np.empty([m_params, 1])
 
-   for (k=0;k<=m;k++){
-	   v[k][0]=0;
-	   for (i=0; i<n; i++){
-			   v[k][0]=v[k][0]+y[i]*pow(x[i],k);
-	   }
-	   cout << "v[" << k << "] =" << v[k][0] << endl;
-	   for (j=0; j<=m; j++){
-		   a[k][j]=0;
-	   	   for (i=0; i<n; i++){
-			   a[k][j]=a[k][j]+pow(x[i],k+j);
-	   	   }		
-		   cout << "a[" << k << "][" << j << "] = " << a[k][j] << endl;
-	   }
-   }
+# TODO possibly determine a constant det, might not be necessary if its set later on
 
-   aold = a;
+for k in range(0,m):
+	v[k][0] = 0
+	for i in range(0,n):
+		v[k][0] = v[k][0] + y[i]*(x[i]**k)
+	print "v[",k,"] =",v[k][0]
+	for j in range(0,m):
+		a[k][j] = 0
+		for i in range(0,n):
+			a[k][j] = a[k][j] + (x[i]**(k+j))
+		print "a[",k,"][",j,"] = ",a[k][j]
 
-   a.InvertFast(&det);
-   TMatrixD U1(a,TMatrixD::kMult,aold);
-   TMatrixDDiag diag1(U1); diag1=0.0;
-   const Double_t U1_max_offdiag = (U1.Abs()).Max();
-   cout << " Maximum off-diagonal = " << U1_max_offdiag << endl;
-   cout << " Determinant          = " << det << endl;
+aold = a
 
-   TMatrixD coeff(a,TMatrixD::kMult,v);
-   for (k=0;k<=m;k++){
-   	cout << " c[" << k << "] = " << coeff[k][0] << endl;
-   }	
+a = inv(a)
+#TODO explain these operationss
+#a.InvertFast(&det);
+#TMatrixD U1(a,TMatrixD::kMult,aold);
+#TMatrixDDiag diag1(U1); diag1=0.0;
+#const Double_t U1_max_offdiag = (U1.Abs()).Max();
 
-//
-// Fill TGraph object with generated data, and fit with ROOT's 
-// built-in polynomial fitting function - p3 = 3rd order polynomial
-//
 
-   TGraph *gr = new TGraph(n,x,y);
-   TF1 *pfit1 = new TF1("pfit1","pol3");
-   gr->SetMarkerStyle(21);
-   gr->SetTitle("Cubic Fit");
-   gr->GetXaxis()->SetTitle("X");
-   gr->GetYaxis()->SetTitle("Y");
+print " Maximum off-diagonal = ",U1_max_offdiag
+print " Determinant          = ",det
 
-   pfit1->SetLineColor(2);
-   gr->Fit("pfit1","q");
-   Double_t pfit1chi2 = pfit1->GetChisquare();
-   Double_t pfit1ndf = pfit1->GetNDF();
-   Double_t pfit1chi2ndf = pfit1chi2/pfit1ndf;
-   printf("Fit 1: %f %f \n",pfit1chi2,pfit1ndf);
-   gr->Draw("AP");
+# TODO explain this command as well
+#TMatrixD coeff(a,TMatrixD::kMult,v);
 
-   // draw the legend
-   Char_t message[80];
-   TLegend *legend=new TLegend(0.4,0.15,0.88,0.35);
-   legend->SetTextFont(72);
-   legend->SetTextSize(0.04);
-   legend->AddEntry(gr,"Data","lpe");
-   sprintf(message,"Fit: #chi^{2}/NDF = %.5f",pfit1chi2ndf);
-   legend->AddEntry(pfit1,message);
-//   legend->Draw();
+for k in range(0,m):
+	print " c[",k,"] = ",coeff[k][0]
 
-   // TCanvas::Update() draws the frame, after which one can change it
-   c1->Update();
-   c1->GetFrame()->SetFillColor(21);
-   c1->GetFrame()->SetBorderSize(12);
-   c1->Modified();
-}
+# Fill graph object with generated data, and fit with polynomial fitting function - 3rd order polynomial
+
+#TODO define graph object
+#TODO define fit
+#TODO set marker style
+#TODO set title = "Cubic Fit"
+#TODO setXAxisTitle "X"
+#TODO setYAxisTitle "Y"
+
+#TODO define fit line color
+#TODO apply the fit to the graph
+#TODO get the chi2dof value between fit and graph data
+#TODO what is GetNDF
+#TODO Get CHI2DOF and NDF
+
+print "Fit 1: ",pfit1chi2," ",pfit1ndf
+#TODO draw the graph
+
+# Draw the legend
+#TODO set legend size
+#TODO set legend textFont
+#TODO set legend textSize
+#TODO set legend entry: "Fit: #chi^{2}/NDF = ",pfit1chi2ndf
+#TODO draw the legend
+
+#TODO update and actually make the graph, setting fill color and border size
+
+#*********************************************************************************
+
+# Define plot figure
+fig = plt.figure()
+
+# Add a 1x1 subplot in space 1 of the plot figure
+ax1 = fig.add_subplot(1,1,1)
+
+# Define the title, axis lables, and turn on the grid lines for subplot 1
+ax1.set_title("Density")    
+ax1.set_xlabel('Altitude (m)')
+ax1.set_ylabel('Density (kg/m^3)')
+ax1.grid(True)
+
+# TODO not sure what this command means
+ax1.set_yscale("log",nonposy='clip')
+
+# Make the first subplot a scatter plot of Altitude vs Density
+ax1.scatter(altitude,density)
+
+# Initialize values - TODO not sure what these are, p-optimal, p-covariance?
+init_vals = [10.0,-0.0001,-0.0000001]
+popt, pcov = curve_fit(fitfunction, altitude, density, p0=init_vals)
+
+# Plot the altitude array, TODO fit the altitude array with p-optimal data? With a solid red line, and Label the data with the given label
+ax1.plot(altitude, fitfunction(altitude, *popt), 'r-', label = 'fit: Amplitude = %.3E, Linear = %.3E, Quadratic = %.3E' % tuple(popt))
+
+# Include a legend for subplot 1
+leg = ax1.legend()
+
+# Display the plot
+plt.show()
