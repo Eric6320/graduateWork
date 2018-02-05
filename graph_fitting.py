@@ -1,5 +1,6 @@
 #TODO include imports
-import numpy as np, matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.pyplot as plt
 
 # A cubic function whos parameters are specified locally
 generating_function(x):
@@ -15,15 +16,13 @@ x[n] = []
 y[n] = []
 rnd = [] # Arrays to hold xy values and fluctuations.
 
-# r = math.rand #TODO figure out a random number generator
-
 for i in range(0,n):
 	# Choose an x value between -4 and 4
 	x[i] = -4.0+8.0*i/n
 	# Call cubic generating function
 	y[i] = generating_function(x[i])
-	rnd = r.Gauss(0.0, 1.5) #TODO generate a gaussian, ask what these arguments mean: rnd = r.Gaus(0.0,1.5);
-	# Add random 'noise' to the data
+	#rnd = r.Gauss(0.0, 1.5) #TODO generate a gaussian, ask what these arguments mean: rnd = r.Gaus(0.0,1.5);
+	rnd = np.random.normal(0.0, 1.5) # Add random 'noise' to the data
 	y[i] = y[i] + rnd
 
 # Calculate fit parameters "by hand"
