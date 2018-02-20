@@ -12,12 +12,12 @@ using namespace std;
 int main() {
 
   //* Initialize the polynomial
-
   double a0 = 1.80;
   double a1 = -4.05;
   double a2 = 0.40;
   double a3 = 1.00;
 
+  // initialize variables
   double f, xmid, fa, fb, fc;
 
   double xlow = -4.0;

@@ -2,6 +2,7 @@
 #include "TMatrixD.h"
 #include "TRandom.h"
 
+// Generate some cubic function from the given argument X
 Double_t generating_function(Double_t x)
 {
         Double_t par[4];
@@ -16,9 +17,7 @@ Double_t generating_function(Double_t x)
 }
 
 void graph_fitting_errors() {
-   //
-   //Modified: Edward J. Brash
-   //		
+
   
    //gStyle->SetOptFit(kFALSE);	
    gStyle->SetOptFit(1);
